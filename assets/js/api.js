@@ -1,49 +1,103 @@
 const API = {
     baseURL: 'controllers/',
-    
+
     cars: {
         getFeatured: async () => {
-            const res = await fetch(`${API.baseURL}car_controller.php?action=getFeatured`);
-            return await res.json();
+            try {
+                const res = await fetch(`${API.baseURL}car_controller.php?action=getFeatured`);
+                if (!res.ok) throw new Error();
+                return await res.json();
+            } catch {
+                return { success: true, data: STATIC_DATA.cars.slice(0, 6) };
+            }
         },
         getAll: async () => {
-            const res = await fetch(`${API.baseURL}car_controller.php?action=getAll`);
-            return await res.json();
+            try {
+                const res = await fetch(`${API.baseURL}car_controller.php?action=getAll`);
+                if (!res.ok) throw new Error();
+                return await res.json();
+            } catch {
+                return { success: true, data: STATIC_DATA.cars };
+            }
         },
         getById: async (id) => {
-            const res = await fetch(`${API.baseURL}car_controller.php?action=getById&id=${id}`);
-            return await res.json();
+            try {
+                const res = await fetch(`${API.baseURL}car_controller.php?action=getById&id=${id}`);
+                if (!res.ok) throw new Error();
+                return await res.json();
+            } catch {
+                const car = STATIC_DATA.cars.find(c => c.id === parseInt(id));
+                return car
+                    ? { success: true, data: { car, images: [] } }
+                    : { success: false, message: 'Không tìm thấy xe' };
+            }
         },
         search: async (params) => {
-            const query = new URLSearchParams(params).toString();
-            const res = await fetch(`${API.baseURL}car_controller.php?action=search&${query}`);
-            return await res.json();
+            try {
+                const query = new URLSearchParams(params).toString();
+                const res = await fetch(`${API.baseURL}car_controller.php?action=search&${query}`);
+                if (!res.ok) throw new Error();
+                return await res.json();
+            } catch {
+                let cars = [...STATIC_DATA.cars];
+                if (params.brand) cars = cars.filter(c => c.brand === params.brand);
+                if (params.seats) cars = cars.filter(c => c.seats === parseInt(params.seats));
+                if (params.price) {
+                    if (params.price.includes('-')) {
+                        const [min, max] = params.price.split('-').map(Number);
+                        cars = cars.filter(c => c.price_per_day >= min && c.price_per_day <= max);
+                    } else {
+                        cars = cars.filter(c => c.price_per_day >= parseInt(params.price));
+                    }
+                }
+                return { success: true, data: cars };
+            }
         },
         getFilterOptions: async () => {
-            const res = await fetch(`${API.baseURL}car_controller.php?action=getFilterOptions`);
-            return await res.json();
+            try {
+                const res = await fetch(`${API.baseURL}car_controller.php?action=getFilterOptions`);
+                if (!res.ok) throw new Error();
+                return await res.json();
+            } catch {
+                return { success: true, ...STATIC_DATA.filterOptions };
+            }
         }
     },
-    
+
     services: {
         getAll: async () => {
-            const res = await fetch(`${API.baseURL}service_controller.php?action=getAll`);
-            return await res.json();
+            try {
+                const res = await fetch(`${API.baseURL}service_controller.php?action=getAll`);
+                if (!res.ok) throw new Error();
+                return await res.json();
+            } catch {
+                return { success: true, data: STATIC_DATA.services };
+            }
         }
     },
-    
+
     bookings: {
         create: async (data) => {
-            const res = await fetch(`${API.baseURL}booking_controller.php?action=create`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(data)
-            });
-            return await res.json();
+            try {
+                const res = await fetch(`${API.baseURL}booking_controller.php?action=create`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (!res.ok) throw new Error();
+                return await res.json();
+            } catch {
+                return { success: false, demo: true };
+            }
         },
         getById: async (id) => {
-            const res = await fetch(`${API.baseURL}booking_controller.php?action=getById&id=${id}`);
-            return await res.json();
+            try {
+                const res = await fetch(`${API.baseURL}booking_controller.php?action=getById&id=${id}`);
+                if (!res.ok) throw new Error();
+                return await res.json();
+            } catch {
+                return { success: false };
+            }
         }
     }
 };

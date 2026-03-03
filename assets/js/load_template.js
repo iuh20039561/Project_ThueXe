@@ -1,4 +1,5 @@
 function loadHeader() {
+    injectBaseSEO();
     fetch('views/layouts/header.html')
         .then(r => r.text())
         .then(html => {
@@ -6,6 +7,65 @@ function loadHeader() {
             highlightActiveNav();
             injectBackBar();
         });
+}
+
+function injectBaseSEO() {
+    const seo = window.PAGE_SEO || {};
+    const SITE_BASE = 'https://iuh-20039761-lebaophi.github.io/GlobalCare/thue-xe';
+
+    const title = seo.title || 'CarRental – Thuê Xe Uy Tín TP.HCM | Giao Xe Tận Nơi';
+    const desc  = seo.desc  || 'CarRental – dịch vụ cho thuê xe tự lái và có tài xế uy tín tại TP.HCM. Hơn 100 dòng xe từ 450.000đ/ngày. Giao xe tận nơi, bảo hiểm đầy đủ. Hotline: 0123 456 789.';
+    const keys  = seo.keys  || 'thuê xe tphcm, thuê xe tự lái, cho thuê xe có tài xế, thuê xe giá rẻ, car rental hcm';
+    const url   = seo.url   || SITE_BASE + '/';
+    const img   = seo.img   || SITE_BASE + '/assets/images/cars/camry.jpg';
+
+    document.title = title;
+
+    const setMeta = (sel, attr, val) => {
+        let el = document.querySelector(sel);
+        if (!el) {
+            el = document.createElement('meta');
+            document.head.appendChild(el);
+        }
+        el.setAttribute(attr, val);
+    };
+
+    setMeta('meta[name="description"]',       'content', desc);
+    setMeta('meta[name="keywords"]',           'content', keys);
+    setMeta('meta[name="robots"]',             'content', 'index, follow');
+    setMeta('meta[name="author"]',             'content', 'CarRental TP.HCM');
+    setMeta('meta[name="geo.region"]',         'content', 'VN-SG');
+    setMeta('meta[name="geo.placename"]',      'content', 'Thành phố Hồ Chí Minh');
+
+    setMeta('meta[property="og:type"]',        'content', 'website');
+    setMeta('meta[property="og:url"]',         'content', url);
+    setMeta('meta[property="og:title"]',       'content', title);
+    setMeta('meta[property="og:description"]', 'content', desc);
+    setMeta('meta[property="og:image"]',       'content', img);
+    setMeta('meta[property="og:locale"]',      'content', 'vi_VN');
+    setMeta('meta[property="og:site_name"]',   'content', 'CarRental');
+
+    setMeta('meta[name="twitter:card"]',        'content', 'summary_large_image');
+    setMeta('meta[name="twitter:title"]',       'content', title);
+    setMeta('meta[name="twitter:description"]', 'content', desc);
+    setMeta('meta[name="twitter:image"]',       'content', img);
+
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (!canonical) {
+        canonical = document.createElement('link');
+        canonical.rel = 'canonical';
+        document.head.appendChild(canonical);
+    }
+    canonical.href = url;
+
+    let favicon = document.querySelector('link[rel="icon"]');
+    if (!favicon) {
+        favicon = document.createElement('link');
+        favicon.rel = 'icon';
+        favicon.type = 'image/png';
+        favicon.href = 'assets/images/cars/default.jpg';
+        document.head.appendChild(favicon);
+    }
 }
 
 function loadFooter() {

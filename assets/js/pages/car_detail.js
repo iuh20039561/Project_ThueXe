@@ -27,7 +27,27 @@ async function loadCarDetail(carId) {
     if(result.success && result.data) {
         currentCar = result.data.car;
         currentImages = result.data.images || [];
-        
+
+        // Update page SEO dynamically
+        const car = result.data.car;
+        const SITE_BASE = 'https://iuh-20039761-lebaophi.github.io/GlobalCare/thue-xe';
+        const carUrl = `${SITE_BASE}/car_detail.html?id=${car.id}`;
+        const carImg = `${SITE_BASE}/assets/images/cars/${car.main_image}`;
+        const carTitle = `${car.name} – Thuê Xe TP.HCM | ${new Intl.NumberFormat('vi-VN').format(car.price_per_day)}đ/ngày`;
+        const carDesc = `Thuê ${car.name} tại CarRental TP.HCM. ${car.seats} chỗ, ${car.transmission}, ${car.fuel_type}. Giá chỉ từ ${new Intl.NumberFormat('vi-VN').format(car.price_per_day)}đ/ngày. Giao xe tận nơi, bảo hiểm đầy đủ.`;
+        document.title = carTitle;
+        const setMeta = (sel, attr, val) => { const el = document.querySelector(sel); if (el) el.setAttribute(attr, val); };
+        setMeta('meta[name="description"]', 'content', carDesc);
+        setMeta('meta[property="og:title"]', 'content', carTitle);
+        setMeta('meta[property="og:description"]', 'content', carDesc);
+        setMeta('meta[property="og:url"]', 'content', carUrl);
+        setMeta('meta[property="og:image"]', 'content', carImg);
+        setMeta('meta[name="twitter:title"]', 'content', carTitle);
+        setMeta('meta[name="twitter:description"]', 'content', carDesc);
+        setMeta('meta[name="twitter:image"]', 'content', carImg);
+        const canonical = document.querySelector('link[rel="canonical"]');
+        if (canonical) canonical.href = carUrl;
+
         displayCarDetail(result.data);
         displayBookingForm(result.data.car);
     } else {
@@ -94,7 +114,7 @@ function displayCarDetail(data) {
         <!-- Car Info -->
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-body p-4">
-                <h2 class="fw-bold mb-3">${car.name}</h2>
+                <h1 class="fw-bold mb-3 fs-3">${car.name}</h1>
                 <div class="d-flex align-items-center mb-3">
                     <span class="badge bg-primary me-2">${car.brand}</span>
                     <span class="badge bg-secondary me-2">${car.model}</span>
@@ -373,10 +393,20 @@ async function submitBooking(car) {
     
     try {
         const result = await API.bookings.create(bookingData);
-        
+
         if(result.success) {
             // Redirect to success page
             window.location.href = `index.php?page=booking_success&id=${result.booking_id}`;
+        } else if(result.demo) {
+            // Static / no-server fallback: show demo success
+            showBookingAlert(`
+                <i class="fas fa-check-circle me-2"></i>
+                <strong>Đặt xe thành công! (Demo)</strong><br>
+                Cảm ơn bạn đã quan tâm đến <strong>${car.name}</strong>.<br>
+                Để hoàn tất đặt xe, vui lòng gọi hotline <strong>0123 456 789</strong> – hỗ trợ 24/7.
+            `, 'success');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
         } else {
             showBookingAlert(result.message || 'Có lỗi xảy ra!', 'danger');
             submitBtn.disabled = false;
